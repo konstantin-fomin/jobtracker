@@ -21,21 +21,10 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Redirect unauthenticated users to /auth
-  if (!user && !request.nextUrl.pathname.startsWith('/auth')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth'
-    return NextResponse.redirect(url)
-  }
-
-  // Redirect authenticated users away from /auth
-  if (user && request.nextUrl.pathname.startsWith('/auth')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
+  // AUTH DISABLED FOR LOCAL DEV — restore redirects when done
+  // const { data: { user } } = await supabase.auth.getUser()
+  // if (!user && !request.nextUrl.pathname.startsWith('/auth')) { ... }
+  // if (user && request.nextUrl.pathname.startsWith('/auth')) { ... }
 
   return supabaseResponse
 }

@@ -3,3 +3,9 @@
 node_modules/
 .next/
 out/
+
+# Design skills & catalogs (installed locally, not part of the app)
+.claude/
+.agents/
+.design/
+skills-lock.json

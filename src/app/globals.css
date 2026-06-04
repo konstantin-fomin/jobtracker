@@ -2,35 +2,206 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  * { box-sizing: border-box; }
-  
-  input, select, textarea {
-    @apply outline-none focus:ring-2 focus:ring-stone-900/10 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm transition;
-  }
-  textarea { @apply resize-y; }
+/* ===== Design tokens ===== */
+:root {
+  /* Surfaces */
+  --bg:           #faf9f8;
+  --surface:      #ffffff;
+  --surface-2:    #f6f5f4;
+
+  /* Borders */
+  --hairline:        #eae8e3;
+  --hairline-strong: #dcd9d2;
+
+  /* Text — all pass WCAG AA 4.5:1 on both --surface and --surface-2 */
+  --ink:        #37352f;   /* warm charcoal   12.3:1 on white */
+  --ink-muted:  #6b685f;   /*                  5.6:1 on white */
+  --ink-subtle: #706c64;   /* was #9c988f →    5.2:1 on white, 4.6:1 on surface-2 ✓ */
+
+  /* Accent – emerald
+   * --accent:     brand color for decoration (rings, dots, logo bg, badges)
+   * --accent-btn: darker shade for button bg so white text passes 4.5:1          */
+  --accent:           #0d9373;   /* brand emerald */
+  --accent-hover:     #0b7d62;
+  --accent-btn:       #0b7b62;   /* 4.71:1 with white ✓ */
+  --accent-btn-hover: #08674f;
+  --accent-soft:      rgba(13, 147, 115, 0.10);
+  --accent-ring:      rgba(13, 147, 115, 0.40);   /* for featured card border */
+
+  /* Inputs */
+  --input-bg:    #ffffff;
+  --row-edit-bg: rgba(13, 147, 115, 0.04);
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(15, 15, 15, 0.05);
+  --shadow-pop:  0 10px 30px -8px rgba(15, 15, 15, 0.18);
 }
 
-@layer components {
-  .btn {
-    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+.dark {
+  /*
+   * Dark palette strategy: deep anchor + clear elevation steps.
+   *
+   *  bg         #0f0e0d  ← very dark foundation
+   *  surface    #1c1b18  ← cards float  (+L ~7)
+   *  surface-2  #252320  ← table head, nested (+L ~5)
+   *  input-bg   #2e2c28  ← inputs visible above surface (+L ~5)
+   *
+   * In dark mode shadows are invisible; use a subtle rim-light
+   * (faint white border) to give cards perceived elevation.
+   */
+
+  --bg:           #0f0e0d;
+  --surface:      #1c1b18;
+  --surface-2:    #252320;
+
+  --hairline:        #302e29;
+  --hairline-strong: #3f3c36;
+
+  --ink:        #f0eeeb;   /*               14.9:1 on surface ✓ */
+  --ink-muted:  #9e9b94;   /*                6.2:1 on surface ✓ */
+  --ink-subtle: #88847c;   /* was #6a6760 →  4.6:1 on surface, 4.6:1 on surface-2 ✓ */
+
+  --accent:           #1aa883;   /* brand vibrant */
+  --accent-hover:     #22b890;
+  --accent-btn:       #1aa883;   /* same as accent: consistent logo+button; 3.0:1 with white (large-text OK) */
+  --accent-btn-hover: #22b890;
+  --accent-soft:      rgba(26, 168, 131, 0.13);
+  --accent-ring:      rgba(26, 168, 131, 0.45);   /* featured card border */
+
+  /* Inputs need to clearly "pop" above the card surface */
+  --input-bg:    #2e2c28;
+  --row-edit-bg: rgba(26, 168, 131, 0.08);
+
+  /* Rim-light card: subtle highlight border + depth shadow */
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.05),
+                 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-pop:  0 12px 32px -8px rgba(0, 0, 0, 0.75);
+}
+
+/* ===== Base ===== */
+@layer base {
+  * { box-sizing: border-box; }
+  html { -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
-  .btn-primary {
-    @apply btn bg-stone-900 text-white hover:bg-stone-700;
+
+  /* ── Form controls ── */
+  input, select, textarea {
+    @apply rounded-lg px-3 py-2 text-sm transition;
+    background: var(--input-bg);
+    border: 1px solid var(--hairline-strong);
+    color: var(--ink);
   }
-  .btn-ghost {
-    @apply btn border border-stone-200 bg-white text-stone-700 hover:bg-stone-50;
+  input::placeholder, textarea::placeholder { color: var(--ink-subtle); }
+  select { color: var(--ink); }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
-  .btn-danger {
-    @apply btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+  textarea { @apply resize-y; }
+
+  /* Keyboard focus ring */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
-  .badge {
-    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium;
-  }
-  .card {
-    @apply rounded-2xl border border-stone-200 bg-white shadow-sm;
-  }
-  .label {
-    @apply block text-xs font-medium text-stone-500 mb-1;
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
   }
 }
+
+/* ===== Components ===== */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg
+           px-4 py-2 text-sm font-semibold
+           transition active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply btn text-white;
+    background: var(--accent-btn);   /* darker than brand accent → 4.5:1+ with white */
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-btn-hover); }
+
+  .btn-ghost {
+    @apply btn;
+    background: var(--surface);
+    border: 1px solid var(--hairline-strong);
+    color: var(--ink-muted);
+  }
+  .btn-ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+
+  /* Cards: rounded container with elevation */
+  .card {
+    @apply rounded-2xl;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Status pills */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  /* Ghost icon buttons */
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded-lg p-1.5 transition cursor-pointer;
+    color: var(--ink-subtle);
+  }
+  .icon-btn:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+
+  /* ── Inline table cell inputs ──
+   * Deliberately lighter than the table surface so they read
+   * as interactive fields in both light and dark themes.       */
+  .cell-input {
+    @apply w-full rounded-md px-2 py-1.5 text-sm transition;   /* py-1→py-1.5: better touch target */
+    background: var(--input-bg);
+    border: 1px solid var(--hairline-strong);
+    color: var(--ink);
+  }
+  .cell-input::placeholder { color: var(--ink-subtle); }
+  .cell-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  .cell-input.invalid {
+    border-color: #e5484d;
+    box-shadow: 0 0 0 2px rgba(229, 72, 77, 0.18);
+  }
+
+  /* ── Skeleton shimmer ── */
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--surface-2) 25%,
+      var(--hairline-strong) 50%,
+      var(--surface-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease infinite;
+  }
+}
+
+/* animate-fade-in keyframes live in tailwind.config.js */

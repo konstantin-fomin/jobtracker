@@ -1,6 +1,7 @@
 'use client'
 import { createClient } from '@/lib/supabase'
 import { useState } from 'react'
+import { IconBriefcase } from '@/components/icons'
 
 export default function AuthPage() {
   const supabase = createClient()
@@ -15,15 +16,15 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-stone-900 text-white text-2xl mb-4">
-            💼
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent text-white mb-4 shadow-sm">
+            <IconBriefcase size={26} />
           </div>
-          <h1 className="text-2xl font-semibold text-stone-900">JobTracker</h1>
-          <p className="mt-1 text-sm text-stone-500">Отслеживайте отклики на вакансии</p>
+          <h1 className="text-2xl font-extrabold text-ink tracking-tight">JobTracker</h1>
+          <p className="mt-1 text-sm text-ink-muted">Отслеживайте отклики на вакансии</p>
         </div>
 
         <div className="card p-6 space-y-3">
@@ -53,7 +54,7 @@ export default function AuthPage() {
           </button>
         </div>
 
-        <p className="mt-6 text-center text-xs text-stone-400">
+        <p className="mt-6 text-center text-xs text-ink-subtle">
           Ваши данные видны только вам
         </p>
       </div>
