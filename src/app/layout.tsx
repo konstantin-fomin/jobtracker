@@ -12,6 +12,7 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: 'ApplyFlow — поиск работы',
   description: 'Отслеживайте отклики на вакансии в одном месте',
+  icons: { icon: '/logo.png', apple: '/logo.png' },
 }
 
 // Set the theme before paint to avoid a flash of the wrong theme.
