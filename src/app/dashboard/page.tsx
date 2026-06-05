@@ -489,6 +489,34 @@ export default function Dashboard() {
     setEditId(null)
   }
 
+  // Quick status change from the table badge — optimistic, reuses the jobs
+  // update path without opening the edit form.
+  const updateJobStatus = async (id: string, status: Status) => {
+    const previous = jobs.find(j => j.id === id)
+    if (!previous || previous.status === status) return
+
+    const now = new Date().toISOString()
+    setJobs(prev => prev.map(j => (j.id === id ? { ...j, status, updated_at: now } : j)))
+
+    if (DEMO_JOBS_ENABLED) {
+      showToast('Статус обновлён', 'success')
+      return
+    }
+
+    if (!supabase) {
+      setJobs(prev => prev.map(j => (j.id === id ? previous : j)))
+      return
+    }
+
+    const { error } = await supabase.from('jobs').update({ status }).eq('id', id)
+    if (error) {
+      setJobs(prev => prev.map(j => (j.id === id ? previous : j)))
+      showToast('Не удалось обновить статус', 'error')
+      return
+    }
+    showToast('Статус обновлён', 'success')
+  }
+
   const startEdit = (id: string) => {
     setExpandedId(null)
     setEditId(id)
@@ -960,6 +988,7 @@ export default function Dashboard() {
                       deleted={deletedView}
                       activeColumns={activeColumns}
                       onStartEdit={() => startEdit(job.id)}
+                      onChangeStatus={(status) => updateJobStatus(job.id, status)}
                       onDelete={() => deleteJob(job.id)}
                       onRestore={() => restoreJob(job.id)}
                       onPermanentDelete={() => permanentlyDeleteJob(job.id)}

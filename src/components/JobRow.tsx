@@ -1,7 +1,9 @@
 'use client'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
-  Job, STATUS_META, ColumnKey,
+  Job, Status, STATUS_META, STATUS_ORDER, ColumnKey,
   STAGE_LABEL,
   WORK_FORMAT_LABEL, WORK_FORMAT_BADGE,
   REJECT_REASON_LABEL,
@@ -26,6 +28,90 @@ function WorkFormatBadge({ value }: { value: string }) {
     <span className={`badge ${WORK_FORMAT_BADGE[value] ?? 'bg-surface-2 text-ink-muted'}`}>
       {WORK_FORMAT_LABEL[value] ?? value}
     </span>
+  )
+}
+
+// Clickable status badge with a lightweight quick-change menu. The menu is
+// rendered through a portal with fixed positioning so it escapes the table's
+// clipped cells (`.table-clip` overflow:hidden) and the card's overflow:hidden.
+function StatusPicker({ status, onSelect }: { status: Status; onSelect: (s: Status) => void }) {
+  const [open, setOpen] = useState(false)
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return
+      setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const onReflow = () => setOpen(false)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    window.addEventListener('scroll', onReflow, true)
+    window.addEventListener('resize', onReflow)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+      window.removeEventListener('scroll', onReflow, true)
+      window.removeEventListener('resize', onReflow)
+    }
+  }, [open])
+
+  const toggle = () => {
+    if (open) { setOpen(false); return }
+    const r = triggerRef.current?.getBoundingClientRect()
+    if (r) setCoords({ top: r.bottom + 4, left: r.left })
+    setOpen(true)
+  }
+
+  const choose = (s: Status) => {
+    setOpen(false)
+    if (s !== status) onSelect(s)
+  }
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={e => { e.stopPropagation(); toggle() }}
+        className="rounded-full transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        title="Изменить статус"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Изменить статус"
+      >
+        <StatusBadge status={status} />
+      </button>
+      {open && coords && createPortal(
+        <div
+          ref={menuRef}
+          role="menu"
+          onClick={e => e.stopPropagation()}
+          style={{ position: 'fixed', top: coords.top, left: coords.left, zIndex: 50 }}
+          className="min-w-[164px] rounded-lg border border-hairline bg-surface p-1 shadow-lg"
+        >
+          {STATUS_ORDER.map(s => (
+            <button
+              key={s}
+              type="button"
+              role="menuitemradio"
+              aria-checked={s === status}
+              onClick={e => { e.stopPropagation(); choose(s) }}
+              className="flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-surface-2"
+            >
+              <StatusBadge status={s} />
+              {s === status && <IconCheck size={14} className="shrink-0 text-accent" />}
+            </button>
+          ))}
+        </div>,
+        document.body,
+      )}
+    </>
   )
 }
 
@@ -141,6 +227,7 @@ interface Props {
   deleted?: boolean
   activeColumns: ColumnKey[]
   onStartEdit: () => void
+  onChangeStatus?: (status: Status) => void
   onDelete?: () => void
   onRestore?: () => void
   onPermanentDelete?: () => void
@@ -151,7 +238,7 @@ interface Props {
 
 export default function JobRow({
   job, expanded, deleted = false, activeColumns,
-  onStartEdit, onDelete, onRestore, onPermanentDelete, onToggleExpand,
+  onStartEdit, onChangeStatus, onDelete, onRestore, onPermanentDelete, onToggleExpand,
 }: Props) {
   const ac = new Set(activeColumns)
   const has = (k: ColumnKey) => ac.has(k)
@@ -214,8 +301,12 @@ export default function JobRow({
             {fmtDate(job.date)}
           </td>
         )}
-        {/* status — fixed */}
-        <td className="px-2 py-3.5" title={STATUS_META[job.status].label}><StatusBadge status={job.status} /></td>
+        {/* status — fixed; click to quick-change (active rows only) */}
+        <td className="px-2 py-3.5" title={STATUS_META[job.status].label}>
+          {deleted || !onChangeStatus
+            ? <StatusBadge status={job.status} />
+            : <StatusPicker status={job.status} onSelect={onChangeStatus} />}
+        </td>
         {has('salary') && (
           <td
             className="px-3 py-3.5 whitespace-nowrap text-ink-muted"
