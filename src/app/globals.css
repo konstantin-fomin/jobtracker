@@ -5,76 +5,65 @@
 /* ===== Design tokens ===== */
 :root {
   /* Surfaces */
-  --bg:           #faf9f8;
+  --bg:           #f3f2ef;
   --surface:      #ffffff;
-  --surface-2:    #f6f5f4;
+  --surface-2:    #fdfdfc;
 
   /* Borders */
-  --hairline:        #eae8e3;
-  --hairline-strong: #dcd9d2;
+  --hairline:        #d9dedb;
+  --hairline-strong: #c9d1cd;
 
   /* Text — all pass WCAG AA 4.5:1 on both --surface and --surface-2 */
-  --ink:        #37352f;   /* warm charcoal   12.3:1 on white */
-  --ink-muted:  #6b685f;   /*                  5.6:1 on white */
-  --ink-subtle: #706c64;   /* was #9c988f →    5.2:1 on white, 4.6:1 on surface-2 ✓ */
+  --ink:        #28312d;
+  --ink-muted:  #66756e;
+  --ink-subtle: #76847e;
 
-  /* Accent – emerald
-   * --accent:     brand color for decoration (rings, dots, logo bg, badges)
-   * --accent-btn: darker shade for button bg so white text passes 4.5:1          */
-  --accent:           #0d9373;   /* brand emerald */
-  --accent-hover:     #0b7d62;
-  --accent-btn:       #0b7b62;   /* 4.71:1 with white ✓ */
-  --accent-btn-hover: #08674f;
-  --accent-soft:      rgba(13, 147, 115, 0.10);
-  --accent-ring:      rgba(13, 147, 115, 0.40);   /* for featured card border */
+  /* Accent – restrained product teal */
+  --accent:           #107963;
+  --accent-hover:     #0d6c57;
+  --accent-btn:       #0e735d;
+  --accent-btn-hover: #0b634f;
+  --accent-soft:      rgba(14, 115, 93, 0.08);
+  --accent-ring:      rgba(14, 115, 93, 0.25);
 
   /* Inputs */
   --input-bg:    #ffffff;
-  --row-edit-bg: rgba(13, 147, 115, 0.04);
 
   /* Elevation */
-  --shadow-card: 0 1px 2px rgba(15, 15, 15, 0.05);
-  --shadow-pop:  0 10px 30px -8px rgba(15, 15, 15, 0.18);
+  --shadow-card: 0 1px 2px rgba(21, 34, 29, 0.045);
+  --shadow-pop:  0 12px 30px -10px rgba(21, 34, 29, 0.18);
 }
 
 .dark {
   /*
-   * Dark palette strategy: deep anchor + clear elevation steps.
-   *
-   *  bg         #0f0e0d  ← very dark foundation
-   *  surface    #1c1b18  ← cards float  (+L ~7)
-   *  surface-2  #252320  ← table head, nested (+L ~5)
-   *  input-bg   #2e2c28  ← inputs visible above surface (+L ~5)
-   *
-   * In dark mode shadows are invisible; use a subtle rim-light
-   * (faint white border) to give cards perceived elevation.
+   * Dark palette strategy: cool teal-tinted charcoal surfaces.
+   * Keep elevation visible without the muddy brown/yellow undertone.
    */
 
-  --bg:           #0f0e0d;
-  --surface:      #1c1b18;
-  --surface-2:    #252320;
+  --bg:           #070b09;
+  --surface:      #101614;
+  --surface-2:    #151c19;
 
-  --hairline:        #302e29;
-  --hairline-strong: #3f3c36;
+  --hairline:        #20312b;
+  --hairline-strong: #2a4037;
 
-  --ink:        #f0eeeb;   /*               14.9:1 on surface ✓ */
-  --ink-muted:  #9e9b94;   /*                6.2:1 on surface ✓ */
-  --ink-subtle: #88847c;   /* was #6a6760 →  4.6:1 on surface, 4.6:1 on surface-2 ✓ */
+  --ink:        #ecf3ef;
+  --ink-muted:  #9aa9a2;
+  --ink-subtle: #7f9189;
 
-  --accent:           #1aa883;   /* brand vibrant */
-  --accent-hover:     #22b890;
-  --accent-btn:       #1aa883;   /* same as accent: consistent logo+button; 3.0:1 with white (large-text OK) */
-  --accent-btn-hover: #22b890;
-  --accent-soft:      rgba(26, 168, 131, 0.13);
-  --accent-ring:      rgba(26, 168, 131, 0.45);   /* featured card border */
+  --accent:           #1db58f;
+  --accent-hover:     #27c49c;
+  --accent-btn:       #0f765d;
+  --accent-btn-hover: #118a6b;
+  --accent-soft:      rgba(29, 181, 143, 0.12);
+  --accent-ring:      rgba(29, 181, 143, 0.34);
 
   /* Inputs need to clearly "pop" above the card surface */
-  --input-bg:    #2e2c28;
-  --row-edit-bg: rgba(26, 168, 131, 0.08);
+  --input-bg:    #17221e;
 
   /* Rim-light card: subtle highlight border + depth shadow */
-  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.05),
-                 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 0 0 1px rgba(236, 243, 239, 0.035),
+                 0 2px 8px rgba(0, 0, 0, 0.48);
   --shadow-pop:  0 12px 32px -8px rgba(0, 0, 0, 0.75);
 }
 
@@ -167,24 +156,10 @@
     color: var(--ink);
   }
 
-  /* ── Inline table cell inputs ──
-   * Deliberately lighter than the table surface so they read
-   * as interactive fields in both light and dark themes.       */
-  .cell-input {
-    @apply w-full rounded-md px-2 py-1.5 text-sm transition;   /* py-1→py-1.5: better touch target */
-    background: var(--input-bg);
-    border: 1px solid var(--hairline-strong);
-    color: var(--ink);
-  }
-  .cell-input::placeholder { color: var(--ink-subtle); }
-  .cell-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-soft);
-  }
-  .cell-input.invalid {
-    border-color: #e5484d;
-    box-shadow: 0 0 0 2px rgba(229, 72, 77, 0.18);
+  /* Invalid field marker for full-size inputs (e.g. drawer form) */
+  .invalid-field {
+    border-color: #e5484d !important;
+    box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.18);
   }
 
   /* ── Skeleton shimmer ── */
@@ -205,3 +180,10 @@
 }
 
 /* animate-fade-in keyframes live in tailwind.config.js */
+
+/* ── Fixed-layout table ─────────────────────────────────────────────────────
+ * .table-clip on <table>: table-layout:fixed enforces column widths from
+ * <colgroup>; overflow:hidden + ellipsis clips cell content.               */
+.table-clip { table-layout: fixed; width: 100%; }
+.table-clip th,
+.table-clip td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
