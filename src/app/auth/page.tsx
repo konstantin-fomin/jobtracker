@@ -23,7 +23,7 @@ export default function AuthPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent text-white mb-4 shadow-sm">
             <IconBriefcase size={26} />
           </div>
-          <h1 className="text-2xl font-extrabold text-ink tracking-tight">JobTracker</h1>
+          <h1 className="text-2xl font-extrabold text-ink tracking-tight">ApplyFlow</h1>
           <p className="mt-1 text-sm text-ink-muted">Отслеживайте отклики на вакансии</p>
         </div>
 

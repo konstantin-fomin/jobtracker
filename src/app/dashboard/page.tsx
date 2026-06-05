@@ -626,7 +626,7 @@ export default function Dashboard() {
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white shadow-sm">
               <IconBriefcase size={17} />
             </span>
-            <span className="font-extrabold text-ink tracking-tight">JobTracker</span>
+            <span className="font-extrabold text-ink tracking-tight">ApplyFlow</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />

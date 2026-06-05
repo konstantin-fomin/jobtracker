@@ -1,4 +1,4 @@
-# 💼 JobTracker
+# 💼 ApplyFlow
 
 Минималистичное веб-приложение для отслеживания откликов на вакансии.  
 **Стек:** Next.js 14 · Supabase · Tailwind CSS · Vercel
