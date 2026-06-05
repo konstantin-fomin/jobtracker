@@ -651,9 +651,8 @@ export default function Dashboard() {
       <header className="sticky top-0 z-20 border-b border-hairline bg-surface/80 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white shadow-sm">
-              <IconBriefcase size={17} />
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="ApplyFlow" className="h-8 w-8 rounded-lg shadow-sm" />
             <span className="font-extrabold text-ink tracking-tight">ApplyFlow</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">

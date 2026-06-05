@@ -1,7 +1,6 @@
 'use client'
 import { createClient } from '@/lib/supabase'
 import { useState } from 'react'
-import { IconBriefcase } from '@/components/icons'
 
 export default function AuthPage() {
   const supabase = createClient()
@@ -20,9 +19,8 @@ export default function AuthPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent text-white mb-4 shadow-sm">
-            <IconBriefcase size={26} />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="ApplyFlow" className="mx-auto mb-4 block h-14 w-14 rounded-2xl shadow-sm" />
           <h1 className="text-2xl font-extrabold text-ink tracking-tight">ApplyFlow</h1>
           <p className="mt-1 text-sm text-ink-muted">Отслеживайте отклики на вакансии</p>
         </div>
