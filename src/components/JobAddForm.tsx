@@ -266,8 +266,9 @@ export default function JobAddForm({ mode = 'create', initialValue, onSubmit, on
           <button
             type="button"
             onClick={() => setDetailsOpen(v => !v)}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
+            className="flex w-full cursor-pointer items-center gap-1.5 rounded-md text-left text-sm font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             aria-expanded={detailsOpen}
+            aria-controls="job-details-panel"
           >
             <IconChevronRight
               size={15}
@@ -277,7 +278,7 @@ export default function JobAddForm({ mode = 'create', initialValue, onSubmit, on
           </button>
 
           {detailsOpen && (
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div id="job-details-panel" className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Field label="Контакт">
                 <input
                   value={draft.contact}
