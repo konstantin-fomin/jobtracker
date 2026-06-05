@@ -308,38 +308,11 @@ export default function JobRow({
             {job.updated_at ? fmtDateTime(job.updated_at) : <span className="text-ink-subtle">—</span>}
           </td>
         )}
-        {/* actions */}
+        {/* actions — only the expand chevron here; edit/delete and
+            restore/permanent-delete live in the expanded panel so a
+            destructive action is never one misclick away from expanding */}
         <td className="px-4 py-3.5">
-          <div className="flex items-center justify-end gap-2">
-            <div className={`flex items-center gap-2 transition-opacity ${deleted ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-              {deleted ? (
-                <>
-                  <button onClick={e => { e.stopPropagation(); onRestore?.() }}
-                    className="text-accent transition-colors hover:text-accent-hover"
-                    title="Восстановить" aria-label="Восстановить">
-                    <IconCheck size={15} />
-                  </button>
-                  <button onClick={e => { e.stopPropagation(); onPermanentDelete?.() }}
-                    className="text-ink-subtle transition-colors hover:text-rose-500"
-                    title="Удалить навсегда" aria-label="Удалить навсегда">
-                    <IconTrash size={15} />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button onClick={e => { e.stopPropagation(); onStartEdit() }}
-                    className="text-ink-subtle transition-colors hover:text-ink"
-                    title="Редактировать" aria-label="Редактировать">
-                    <IconEdit size={15} />
-                  </button>
-                  <button onClick={e => { e.stopPropagation(); onDelete?.() }}
-                    className="text-ink-subtle transition-colors hover:text-rose-500"
-                    title="Удалить" aria-label="Удалить">
-                    <IconTrash size={15} />
-                  </button>
-                </>
-              )}
-            </div>
+          <div className="flex items-center justify-end">
             <button
               onClick={e => { e.stopPropagation(); onToggleExpand?.() }}
               className="text-ink-muted transition-colors hover:text-ink"
@@ -378,14 +351,14 @@ export default function JobRow({
                   </div>
                   <div className="mt-1 text-sm text-ink-muted">{job.role}</div>
                 </div>
-                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
                   {job.url && (
                     <a
                       href={job.url}
                       target="_blank"
                       rel="noreferrer"
                       onClick={e => e.stopPropagation()}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-surface px-2.5 text-xs font-semibold text-accent transition-colors hover:bg-surface-2"
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-hairline bg-surface px-2.5 text-xs font-semibold text-accent transition-colors hover:bg-surface-2"
                     >
                       <IconExternal size={13} />
                       Открыть ссылку
@@ -396,7 +369,7 @@ export default function JobRow({
                       <button
                         type="button"
                         onClick={e => { e.stopPropagation(); onRestore?.() }}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-accent bg-accent-soft px-2.5 text-xs font-semibold text-accent transition-colors hover:bg-surface-2"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-accent bg-accent-soft px-2.5 text-xs font-semibold text-accent transition-colors hover:bg-surface-2"
                       >
                         <IconCheck size={13} />
                         Восстановить
@@ -404,21 +377,31 @@ export default function JobRow({
                       <button
                         type="button"
                         onClick={e => { e.stopPropagation(); onPermanentDelete?.() }}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-200 bg-surface px-2.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-300 dark:hover:bg-rose-500/10"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-surface px-2.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-300 dark:hover:bg-rose-500/10"
                       >
                         <IconTrash size={13} />
                         Удалить навсегда
                       </button>
                     </>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={e => { e.stopPropagation(); onStartEdit() }}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-hairline bg-surface px-2.5 text-xs font-semibold text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
-                    >
-                      <IconEdit size={13} />
-                      Редактировать
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={e => { e.stopPropagation(); onStartEdit() }}
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-hairline bg-surface px-2.5 text-xs font-semibold text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                      >
+                        <IconEdit size={13} />
+                        Редактировать
+                      </button>
+                      <button
+                        type="button"
+                        onClick={e => { e.stopPropagation(); onDelete?.() }}
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-hairline bg-surface px-2.5 text-xs font-semibold text-ink-subtle transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:hover:border-rose-500/30 dark:hover:bg-rose-500/10 dark:hover:text-rose-300"
+                      >
+                        <IconTrash size={13} />
+                        Удалить
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
