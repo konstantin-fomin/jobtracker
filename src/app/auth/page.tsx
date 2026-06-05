@@ -22,7 +22,7 @@ export default function AuthPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="ApplyFlow" className="mx-auto mb-4 block h-14 w-14 rounded-2xl shadow-sm" />
           <h1 className="text-2xl font-extrabold text-ink tracking-tight">ApplyFlow</h1>
-          <p className="mt-1 text-sm text-ink-muted">Отслеживайте отклики на вакансии</p>
+          <p className="mt-1 text-sm text-ink-muted">трекер откликов</p>
         </div>
 
         <div className="card p-6 space-y-3">

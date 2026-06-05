@@ -10,8 +10,8 @@ const nunito = Nunito({
 })
 
 export const metadata: Metadata = {
-  title: 'ApplyFlow — поиск работы',
-  description: 'Отслеживайте отклики на вакансии в одном месте',
+  title: 'ApplyFlow — трекер откликов',
+  description: 'Трекер откликов на вакансии — все отклики в одном месте',
   icons: { icon: '/logo.png', apple: '/logo.png' },
 }
 
