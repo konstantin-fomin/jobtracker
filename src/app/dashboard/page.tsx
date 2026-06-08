@@ -1008,9 +1008,14 @@ export default function Dashboard() {
       <footer className="mt-12 border-t border-hairline">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <span className="text-xs text-ink-subtle">© 2026 ApplyFlow</span>
-          <a href="/privacy" className="text-xs text-ink-subtle hover:text-ink-muted transition-colors">
-            Политика конфиденциальности
-          </a>
+          <div className="flex items-center gap-4">
+            <a href="/terms" className="text-xs text-ink-subtle hover:text-ink-muted transition-colors">
+              Соглашение
+            </a>
+            <a href="/privacy" className="text-xs text-ink-subtle hover:text-ink-muted transition-colors">
+              Конфиденциальность
+            </a>
+          </div>
         </div>
       </footer>
 
