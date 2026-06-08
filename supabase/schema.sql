@@ -113,3 +113,7 @@ create policy "Users manage their own history"
   for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- Table-level grants (RLS alone is not enough — base privileges must be granted)
+grant select, insert, update, delete on public.jobs to authenticated;
+grant select, insert on public.job_status_history to authenticated;
