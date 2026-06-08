@@ -44,6 +44,7 @@ const toJobInsert = (job: Job): JobInsert => ({
   date: job.date ?? '',
   salary_from: job.salary_from ?? '',
   salary_to: job.salary_to ?? '',
+  salary_currency: job.salary_currency,
   contact: job.contact ?? '',
   url: job.url ?? '',
   notes: job.notes ?? '',
@@ -922,7 +923,7 @@ export default function Dashboard() {
                   <col />{/* role    — flex */}
                   {activeSet.has('date')             && <col style={{ width: 84  }} />}
                   <col style={{ width: 112 }} />{/* status */}
-                  {activeSet.has('salary')           && <col style={{ width: 116 }} />}
+                  {activeSet.has('salary')           && <col style={{ width: 138 }} />}
                   {activeSet.has('source')           && <col style={{ width: 96 }} />}
                   {activeSet.has('url')              && <col style={{ width: 80  }} />}
                   {activeSet.has('contact')          && <col style={{ width: 100 }} />}

@@ -13,6 +13,8 @@ create table public.jobs (
   date             date,
   salary_from      text,
   salary_to        text,
+  salary_currency  text not null default 'RUB'
+                     check (salary_currency in ('RUB', 'USD', 'EUR')),
   contact          text,
   url              text,
   notes            text,

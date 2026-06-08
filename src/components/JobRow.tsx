@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Job, Status, STATUS_META, STATUS_ORDER, ColumnKey,
+  Job, Status, SalaryCurrency, STATUS_META, STATUS_ORDER, ColumnKey,
   STAGE_LABEL,
   WORK_FORMAT_LABEL, WORK_FORMAT_BADGE,
   REJECT_REASON_LABEL,
@@ -155,7 +155,7 @@ const isDueDate = (date: string) =>
 const titleOrUndefined = (value: string | null | undefined) =>
   value?.trim() ? value : undefined
 
-const fmtSalary = (from: string, to: string) => {
+const fmtSalary = (from: string, to: string, currency: SalaryCurrency) => {
   if (!from && !to) return '—'
   const compact = (value: string) => {
     const normalized = value.replace(/\s/g, '')
@@ -164,14 +164,14 @@ const fmtSalary = (from: string, to: string) => {
     if (amount >= 1000) return `${Math.round(amount / 1000)}к`
     return value
   }
-  if (from && to) return `${compact(from)}–${compact(to)}`
-  return compact(from || to)
+  const base = from && to ? `${compact(from)}–${compact(to)}` : compact(from || to)
+  return `${base} ${currency}`
 }
 
-const fmtSalaryFull = (from: string, to: string) => {
+const fmtSalaryFull = (from: string, to: string, currency: SalaryCurrency) => {
   if (!from && !to) return '—'
-  if (from && to) return `${from} – ${to}`
-  return from || to
+  const base = from && to ? `${from} – ${to}` : (from || to)
+  return `${base} ${currency}`
 }
 
 const shortSource = (source: string) => {
@@ -249,7 +249,7 @@ export default function JobRow({
   const nextActionDate = job.next_action_date?.trim() ?? ''
   const hasNextAction = Boolean(nextAction || nextActionDate)
   const nextActionDue = isDueDate(nextActionDate)
-  const salaryFull = fmtSalaryFull(job.salary_from, job.salary_to)
+  const salaryFull = fmtSalaryFull(job.salary_from, job.salary_to, job.salary_currency)
   const salaryTitle = salaryFull === '—' ? undefined : salaryFull
   const dateTitle = job.date ? fmtFullDate(job.date) : undefined
   const nextActionTitle = [nextAction, nextActionDate ? fmtFullDate(nextActionDate) : '']
@@ -312,7 +312,7 @@ export default function JobRow({
             className="px-3 py-3.5 whitespace-nowrap text-ink-muted"
             title={salaryTitle}
           >
-            {fmtSalary(job.salary_from, job.salary_to)}
+            {fmtSalary(job.salary_from, job.salary_to, job.salary_currency)}
           </td>
         )}
         {has('source') && (

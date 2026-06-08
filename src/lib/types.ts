@@ -6,6 +6,19 @@ export type ColumnKey =
   | 'stage' | 'next_action' | 'next_action_date' | 'work_format'
   | 'city' | 'rating' | 'reject_reason' | 'updated_at'
 
+// ── Salary currency ───────────────────────────────────────────────────────────
+export type SalaryCurrency = 'RUB' | 'USD' | 'EUR'
+
+export function isSalaryCurrency(value: unknown): value is SalaryCurrency {
+  return value === 'RUB' || value === 'USD' || value === 'EUR'
+}
+
+export const CURRENCY_OPTIONS = [
+  { value: 'RUB' as const, label: 'RUB' },
+  { value: 'USD' as const, label: 'USD' },
+  { value: 'EUR' as const, label: 'EUR' },
+]
+
 export interface Job {
   id: string
   user_id: string
@@ -16,6 +29,7 @@ export interface Job {
   date: string | null
   salary_from: string
   salary_to: string
+  salary_currency: SalaryCurrency
   contact: string
   url: string
   notes: string
@@ -66,6 +80,7 @@ export function normalizeJob(raw: RawJob): Job {
     source: str(raw.source),
     salary_from: str(raw.salary_from),
     salary_to: str(raw.salary_to),
+    salary_currency: isSalaryCurrency(raw.salary_currency) ? raw.salary_currency : 'RUB',
     contact: str(raw.contact),
     url: str(raw.url),
     notes: str(raw.notes),

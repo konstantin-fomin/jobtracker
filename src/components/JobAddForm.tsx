@@ -4,9 +4,11 @@ import type { ReactNode } from 'react'
 import {
   JobInsert,
   Status,
+  SalaryCurrency,
   STATUS_META,
   STATUS_ORDER,
   SOURCES,
+  CURRENCY_OPTIONS,
   STAGE_OPTIONS,
   WORK_FORMAT_OPTIONS,
   REJECT_REASON_OPTIONS,
@@ -21,6 +23,7 @@ const emptyDraft = (): JobInsert => ({
   date: new Date().toISOString().split('T')[0],
   salary_from: '',
   salary_to: '',
+  salary_currency: 'RUB',
   contact: '',
   url: '',
   notes: '',
@@ -244,21 +247,32 @@ export default function JobAddForm({ mode = 'create', initialValue, onSubmit, on
               className="h-10 w-full"
             />
           </Field>
-          <Field label="Следующий шаг" className="sm:col-span-1 lg:col-span-3">
+          <Field label="ЗП от">
             <input
-              value={draft.next_action ?? ''}
-              onChange={e => set('next_action', e.target.value || null)}
-              placeholder="Написать рекрутеру, подготовиться к интервью…"
+              value={draft.salary_from}
+              onChange={e => set('salary_from', e.target.value)}
+              placeholder="от"
               className="h-10 w-full"
             />
           </Field>
-          <Field label="Дата шага">
+          <Field label="ЗП до">
             <input
-              type="date"
-              value={draft.next_action_date ?? ''}
-              onChange={e => set('next_action_date', e.target.value || null)}
+              value={draft.salary_to}
+              onChange={e => set('salary_to', e.target.value)}
+              placeholder="до"
               className="h-10 w-full"
             />
+          </Field>
+          <Field label="Валюта">
+            <select
+              value={draft.salary_currency}
+              onChange={e => set('salary_currency', e.target.value as SalaryCurrency)}
+              className="h-10 w-full"
+            >
+              {CURRENCY_OPTIONS.map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
           </Field>
         </div>
 
@@ -279,27 +293,27 @@ export default function JobAddForm({ mode = 'create', initialValue, onSubmit, on
 
           {detailsOpen && (
             <div id="job-details-panel" className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Field label="Следующий шаг" className="sm:col-span-1 lg:col-span-3">
+                <input
+                  value={draft.next_action ?? ''}
+                  onChange={e => set('next_action', e.target.value || null)}
+                  placeholder="Написать рекрутеру, подготовиться к интервью…"
+                  className="h-10 w-full"
+                />
+              </Field>
+              <Field label="Дата шага">
+                <input
+                  type="date"
+                  value={draft.next_action_date ?? ''}
+                  onChange={e => set('next_action_date', e.target.value || null)}
+                  className="h-10 w-full"
+                />
+              </Field>
               <Field label="Контакт">
                 <input
                   value={draft.contact}
                   onChange={e => set('contact', e.target.value)}
                   placeholder="@hr / email"
-                  className="h-10 w-full"
-                />
-              </Field>
-              <Field label="ЗП от">
-                <input
-                  value={draft.salary_from}
-                  onChange={e => set('salary_from', e.target.value)}
-                  placeholder="от"
-                  className="h-10 w-full"
-                />
-              </Field>
-              <Field label="ЗП до">
-                <input
-                  value={draft.salary_to}
-                  onChange={e => set('salary_to', e.target.value)}
-                  placeholder="до"
                   className="h-10 w-full"
                 />
               </Field>
