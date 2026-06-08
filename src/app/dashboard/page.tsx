@@ -511,6 +511,7 @@ export default function Dashboard() {
 
     const { error } = await supabase.from('jobs').update({ status }).eq('id', id)
     if (error) {
+      console.error('[updateJobStatus]', error)
       setJobs(prev => prev.map(j => (j.id === id ? previous : j)))
       showToast('Не удалось обновить статус', 'error')
       return
