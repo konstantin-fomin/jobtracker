@@ -53,7 +53,10 @@ export default function AuthPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-ink-subtle">
-          Ваши данные видны только вам
+          Ваши данные видны только вам ·{' '}
+          <a href="/privacy" className="hover:text-ink-muted transition-colors">
+            Конфиденциальность
+          </a>
         </p>
       </div>
     </div>

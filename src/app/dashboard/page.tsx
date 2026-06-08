@@ -1004,6 +1004,16 @@ export default function Dashboard() {
         )}
       </main>
 
+      {/* ── Footer ── */}
+      <footer className="mt-12 border-t border-hairline">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <span className="text-xs text-ink-subtle">© 2026 ApplyFlow</span>
+          <a href="/privacy" className="text-xs text-ink-subtle hover:text-ink-muted transition-colors">
+            Политика конфиденциальности
+          </a>
+        </div>
+      </footer>
+
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   )
