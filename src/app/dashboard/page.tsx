@@ -923,7 +923,7 @@ export default function Dashboard() {
                   <col />{/* role    — flex */}
                   {activeSet.has('date')             && <col style={{ width: 84  }} />}
                   <col style={{ width: 112 }} />{/* status */}
-                  {activeSet.has('salary')           && <col style={{ width: 138 }} />}
+                  {activeSet.has('salary')           && <col style={{ width: 156 }} />}
                   {activeSet.has('source')           && <col style={{ width: 96 }} />}
                   {activeSet.has('url')              && <col style={{ width: 80  }} />}
                   {activeSet.has('contact')          && <col style={{ width: 100 }} />}
