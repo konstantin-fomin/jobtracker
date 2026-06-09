@@ -61,9 +61,10 @@ const toJobInsert = (job: Job): JobInsert => ({
 const STATUS_SORT_ORDER: Record<Status, number> = {
   sent: 0,
   interview: 1,
-  offer: 2,
-  rejected: 3,
-  ghosted: 4,
+  test: 2,
+  offer: 3,
+  rejected: 4,
+  ghosted: 5,
 }
 
 const SORTABLE_KEYS = new Set<SortKey>([
