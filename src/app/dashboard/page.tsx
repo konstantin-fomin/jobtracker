@@ -283,8 +283,9 @@ export default function Dashboard() {
     return true
   }
   const needsAction = (job: Job) =>
-    !isFinalStatus(job.status) &&
-    (hasActionValue(job.next_action) || hasActionValue(job.next_action_date))
+    job.status === 'test' ||
+    (!isFinalStatus(job.status) &&
+      (hasActionValue(job.next_action) || hasActionValue(job.next_action_date)))
 
   const todayKey = () => {
     const now = new Date()
