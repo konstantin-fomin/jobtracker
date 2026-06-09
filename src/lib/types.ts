@@ -1,4 +1,4 @@
-export type Status = 'sent' | 'interview' | 'offer' | 'rejected' | 'ghosted'
+export type Status = 'sent' | 'interview' | 'test' | 'offer' | 'rejected' | 'ghosted'
 
 /** Toggleable column keys — all map to real DB fields */
 export type ColumnKey =
@@ -116,6 +116,12 @@ export const STATUS_META: Record<Status, { label: string; badgeLabel: string; ba
     badge: 'bg-violet-50/80 text-violet-700 dark:bg-violet-300/10 dark:text-violet-200',
     dot: 'bg-violet-500/80 dark:bg-violet-300/80',
   },
+  test: {
+    label: 'Тестовое задание',
+    badgeLabel: 'Тест',
+    badge: 'bg-orange-50/80 text-orange-700 dark:bg-orange-300/10 dark:text-orange-200',
+    dot: 'bg-orange-500/80 dark:bg-orange-300/80',
+  },
   offer: {
     label: 'Оффер',
     badgeLabel: 'Оффер',
@@ -136,7 +142,7 @@ export const STATUS_META: Record<Status, { label: string; badgeLabel: string; ba
   },
 }
 
-export const STATUS_ORDER: Status[] = ['sent', 'interview', 'offer', 'rejected', 'ghosted']
+export const STATUS_ORDER: Status[] = ['sent', 'interview', 'test', 'offer', 'rejected', 'ghosted']
 
 export const SOURCES = ['LinkedIn', 'Telegram', 'HeadHunter', 'hh.ru', 'Habr Career', 'Другое']
 

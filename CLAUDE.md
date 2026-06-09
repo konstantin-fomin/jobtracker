@@ -1,4 +1,4 @@
-# JobTracker — project instructions
+# ApplyFlow — project instructions
 
 Сайт для отслеживания откликов на вакансии.
 **Стек:** Next.js 14 (App Router) · React 18 · TypeScript · Tailwind CSS 3 · Supabase · Nunito (Google Fonts, кириллица).
@@ -6,32 +6,44 @@
 
 ---
 
-## Текущее состояние проекта (обновлено 2026-06-04, сессия 2)
+## Текущее состояние проекта (обновлено 2026-06-08, сессия 3)
 
 ### Что реализовано
-- **Дашборд** (`src/app/dashboard/page.tsx`) — метрики (4 StatCard) + таблица откликов
-- **Inline add/edit** — две строки `<tr>`:
-  - Row 1 (36px): Компания · Должность · Дата · Статус · ЗП · Источник + ✓/✗
-  - Row 2 (32px): всегда Ссылка · Контакт · Заметки + активные новые колонки (`--border-tertiary`, h-26px)
-  - Hint bar под таблицей: «Tab · Enter · Esc» (11px, только пока форма открыта)
-- **Expand panel** — шеврон в последней колонке раскрывает строку ниже (colspan all), там редактируемые Ссылка + Контакт с автосохранением на blur
+- **Дашборд** (`src/app/dashboard/page.tsx`) — метрики (5 StatCard с кликом-фильтром) + таблица откликов (~1160 строк)
+- **Форма добавления/редактирования** (`JobAddForm.tsx`) — карточка над таблицей:
+  - Основная часть: Компания · Должность · Статус · Дата · Источник · Ссылка · ЗП от · ЗП до · Валюта
+  - «Детали» (раскрываемый аккордеон): Следующий шаг · Дата шага · Контакт · Этап · Формат · Город · Оценка · Кто рекомендовал · Причина отказа (если rejected) · Заметки
+  - Enter → submit, Escape → cancel, touched/errors для company/role
+- **Expand panel** — шеврон в последней колонке раскрывает строку ниже (colspan all): полный детальный вид + кнопки Редактировать/Удалить (или Восстановить/Удалить навсегда для корзины)
+- **Quick status change** — клик по badge статуса в таблице открывает portal-dropdown для смены без открытия формы
+- **Salary currency** — поле `salary_currency: RUB|USD|EUR` на каждом отклике, отображается в таблице и деталях (напр. `250к–330к RUB`)
+- **Soft delete + Trash** — «удалённые» строки помечаются `deleted_at`, фильтр «Удалённые» в quick-chips; восстановление + permanent delete из expand panel
 - **Optimistic delete** — toast «Отклик удалён · Отменить» (4с на undo)
 - **Toast** (`Toast.tsx`) — success/error/info, action-кнопка
 - **Тёмная + светлая тема** — no-flash через скрипт в `<head>`, localStorage, переключатель в хедере
 - **Count-up анимация** метрик с `prefers-reduced-motion`
-- **Skeleton loader**
-- **Конфигуратор колонок** — кнопка-слайдер в тулбаре открывает панель между тулбаром и таблицей:
-  - 13 переключаемых колонок (default ON: Дата/ЗП/Источник; default OFF: остальные 10)
-  - Фиксированные Компания/Должность/Статус не показываются в панели
-  - Счётчик «N из 13 колонок», кнопка «Сбросить»
-  - Клик снаружи закрывает; `onMouseDown stopPropagation` на триггер-кнопке против race condition
+- **Skeleton loader** + состояния ошибки (auth/jobs) + empty state
+- **Конфигуратор колонок** — кнопка-слайдер в тулбаре:
+  - 14 переключаемых колонок (default ON: Дата/ЗП/Источник; default OFF: остальные 11)
+  - Счётчик «N из 14 колонок», кнопка «Сбросить», пресеты
   - Сохраняется в `localStorage` (`jt_columns`)
-- **Таблица без горизонтального скролла** — `table-layout: fixed` + `<colgroup>` с px-ширинами
+- **Сортировка** — клик по заголовку колонки (asc/desc/сброс); отдельный режим «urgent» по дате следующего шага
+- **Quick-фильтры (chips)** — Все · Активные · Ждём ответа · Интервью · Офферы · Архив · Удалённые
+- **Поиск** по company + role
+- **Фильтр по статусу** (select)
+- **Фильтр «Нужно действие»** (next_action_date просрочен)
+- **Auth** — Google + GitHub OAuth, middleware редиректы включены, `redirectWithSession` копирует cookies
+- **Demo mode** — `NODE_ENV=development && NEXT_PUBLIC_DEMO_JOBS=true` показывает 12 mock-откликов без Supabase
+- **Брендинг ApplyFlow** — логотип (`/logo.png`), favicon, тайтл «ApplyFlow — трекер откликов»
+- **Статические страницы** — `/privacy` (политика) и `/terms` (соглашение) со ссылками в футере
+- **Нормализация данных** — `normalizeJob(RawJob): Job` на границе чтения/записи Supabase
 
-### Auth отключена для локальной разработки
-В `src/middleware.ts` закомментированы редиректы. Чтобы вернуть:
-1. Раскомментировать блоки `if (!user)` и `if (user && /auth)` в middleware.ts
-2. В Supabase Dashboard → Authentication → URL Configuration добавить `http://localhost:3000/**`
+### Auth
+Middleware (`src/middleware.ts`) включён:
+- `/dashboard` без сессии → редирект на `/auth`
+- `/auth` с сессией → редирект на `/dashboard`
+
+Для локальной разработки без авторизации: запустить с `NEXT_PUBLIC_DEMO_JOBS=true`.
 
 ---
 
@@ -40,26 +52,31 @@
 ```
 src/
   app/
-    dashboard/page.tsx     ← главная страница (один файл, ~330 строк)
+    dashboard/page.tsx     ← главная страница (~1160 строк)
     auth/page.tsx          ← логин (Google + GitHub OAuth)
     auth/callback/route.ts
-    layout.tsx             ← Nunito font, no-flash theme script
+    privacy/page.tsx       ← статическая страница политики
+    terms/page.tsx         ← статическая страница соглашения
+    layout.tsx             ← Nunito font, no-flash theme script, favicon
     globals.css            ← ВСЕ design tokens + компоненты + .table-clip
     page.tsx               ← redirect → /dashboard
   components/
-    StatCard.tsx           ← карточка метрики (unified, без tone/featured)
+    JobAddForm.tsx         ← форма добавления/редактирования (карточка над таблицей)
+    JobRow.tsx             ← строка таблицы (view + expand panel + StatusPicker)
+    StatCard.tsx           ← карточка метрики (с onClick-фильтром)
     StatusBadge.tsx        ← цветной pill-бейдж статуса
-    JobRow.tsx             ← строка таблицы (view + inline 2-row edit + expand panel)
     ColumnPanel.tsx        ← панель конфигуратора колонок
     ThemeToggle.tsx        ← переключатель темы
     Toast.tsx              ← toast-уведомления
     icons.tsx              ← SVG-иконки (Lucide-style, без lucide-react dep)
   lib/
     supabase.ts            ← browser client
-    types.ts               ← Job, JobInsert, Status, ColumnKey, все META/OPTIONS
-    useColumns.ts          ← хук колонок + localStorage
+    types.ts               ← Job, JobInsert, RawJob, Status, SalaryCurrency, ColumnKey, normalizeJob, все META/OPTIONS
+    mockJobs.ts            ← 12 mock-откликов для demo mode
+    useColumns.ts          ← хук колонок + localStorage + пресеты
     useCountUp.ts          ← анимация чисел
     useToast.ts            ← хук для toast
+  middleware.ts            ← auth-редиректы + refreshWithSession
 ```
 
 ---
@@ -77,88 +94,123 @@ table: public.jobs
   date              date
   salary_from       text
   salary_to         text
+  salary_currency   text  NOT NULL default 'RUB' CHECK (RUB|USD|EUR)
   contact           text
   url               text
   notes             text
-  created_at        timestamptz DEFAULT now()
-  -- Новые колонки (миграция выполнена):
   stage             text   -- hr|tech|final|offer_negotiation
   next_action       text
   next_action_date  date
   work_format       text   -- office|remote|hybrid
   city              text
-  rating            int    -- 1-5
+  rating            int    -- 1-5 (check constraint)
   referred_by       text
   reject_reason     text   -- no_response|skills|salary|culture|other
-  updated_at        timestamptz  -- auto-managed trigger
+  created_at        timestamptz DEFAULT now()
+  updated_at        timestamptz  -- auto-managed trigger (set_updated_at)
+  deleted_at        timestamptz  -- null = активный, не null = в корзине
 
 table: public.job_status_history  -- auto-filled by trigger on status/stage change
+  id          uuid PK
+  job_id      uuid FK→jobs
+  user_id     uuid FK→auth.users
+  status      text
+  stage       text
+  changed_at  timestamptz
+  note        text
 
-RLS: пользователь видит только свои строки (auth.uid() = user_id)
+-- Triggers:
+--   jobs_updated_at       BEFORE UPDATE → set updated_at = now()
+--   jobs_status_history   AFTER UPDATE  → insert into job_status_history on status/stage change
+
+-- RLS: пользователь видит только свои строки (auth.uid() = user_id)
+-- GRANTS (обязательно — без них триггер падает с 42501):
+--   GRANT SELECT, INSERT, UPDATE, DELETE ON public.jobs TO authenticated;
+--   GRANT SELECT, INSERT ON public.job_status_history TO authenticated;
 ```
 
-Запрос: `select('*')` — тянет все поля включая новые.
+Запрос: `select('*')` — тянет все поля.
+
+### Миграции (в supabase/migrations/)
+```
+202606050001_add_job_details.sql          ← stage, next_action, work_format, city, rating, ...
+202606050002_sync_jobs_workflow_schema.sql ← идемпотентная синхронизация
+202606050003_add_jobs_deleted_at.sql      ← deleted_at + индекс
+202606050004_add_salary_currency.sql      ← salary_currency NOT NULL DEFAULT 'RUB'
+202606050005_grant_history_permissions.sql ← GRANT на jobs + job_status_history
+```
+
+⚠️ После деплоя на новый Supabase-проект: применить все миграции в SQL Editor.
 
 ---
 
 ## Колонки таблицы
 
 ### Фиксированные (всегда видимы, не в панели конфигуратора)
-- Компания, Должность, Статус
+Компания (flex) · Должность (flex) · Статус (112px) · Actions (56px)
 
-### Переключаемые (управляются через ColumnPanel → localStorage `jt_columns`)
+### Переключаемые (ColumnPanel → localStorage `jt_columns`)
 
-| ColumnKey          | Заголовок        | Default | Width  |
-|--------------------|------------------|---------|--------|
-| `date`             | Дата             | ON      | 90px   |
-| `salary`           | ЗП               | ON      | 120px  |
-| `source`           | Источник         | ON      | 100px  |
-| `url`              | Ссылка           | OFF     | 80px   |
-| `contact`          | Контакт          | OFF     | 100px  |
-| `notes`            | Заметки          | OFF     | 120px  |
-| `stage`            | Этап             | OFF     | 100px  |
-| `work_format`      | Формат работы    | OFF     | 100px  |
-| `city`             | Город            | OFF     | 90px   |
-| `next_action`      | Следующий шаг    | OFF     | 120px  |
-| `next_action_date` | Дата шага        | OFF     | 90px   |
-| `rating`           | Оценка           | OFF     | 80px   |
-| `reject_reason`    | Причина отказа   | OFF     | 110px  |
+| ColumnKey          | Заголовок      | Default | Width  |
+|--------------------|----------------|---------|--------|
+| `date`             | Дата           | ON      | 84px   |
+| `salary`           | ЗП             | ON      | 156px  |
+| `source`           | Источник       | ON      | 96px   |
+| `url`              | Ссылка         | OFF     | 80px   |
+| `contact`          | Контакт        | OFF     | 100px  |
+| `notes`            | Заметки        | OFF     | 120px  |
+| `stage`            | Этап           | OFF     | 100px  |
+| `work_format`      | Формат         | OFF     | 100px  |
+| `city`             | Город          | OFF     | 90px   |
+| `next_action`      | Следующий шаг  | OFF     | 168px  |
+| `next_action_date` | Дата шага      | OFF     | 90px   |
+| `rating`           | Оценка         | OFF     | 80px   |
+| `reject_reason`    | Причина отказа | OFF     | 110px  |
+| `updated_at`       | Изменено       | OFF     | 100px  |
 
-Фиксированные — company (flex), role (flex), status (100px), actions (56px).
-
-### Порядок колонок в таблице (FULL_COL_ORDER в page.tsx)
+### Порядок колонок (FULL_COL_ORDER в page.tsx)
 ```
 company → role → date → status → salary → source →
 url → contact → notes →
 stage → work_format → city →
 next_action → next_action_date →
-rating → reject_reason
+rating → reject_reason → updated_at
 ```
 
 ---
 
-## Inline add/edit форма — архитектура
+## JobAddForm — архитектура
 
-### Row 1 (только core поля, 36px)
-`Компания | Должность | [Дата] | Статус | [ЗП от/до] | [Источник] | [empty cells] | ✓✗`
+Отдельный компонент-карточка (`src/components/JobAddForm.tsx`), рендерится над таблицей при `editId !== null`.
 
-- `[в квадратных скобках]` = рендерится только если колонка активна
-- Для каждой активной опциональной колонки рендерится пустой `<td />` — нужно для `table-layout:fixed`
-- Цвет select статуса = цвет текущего значения (inline style)
+### Основная секция (grid lg:4-col, всегда видима)
+```
+Row 1: Компания ×2        | Должность ×2
+Row 2: Статус             | Дата отклика  | Источник     | Ссылка
+Row 3: ЗП от              | ЗП до         | Валюта       | (пусто)
+```
 
-### Row 2 (опциональные поля, 32px, colSpan=all)
-- **Всегда** показывает: Ссылка · Контакт · Заметки (`.optional-input`, h-26px, `--border-tertiary`)
-- **Только если колонка активна**: Этап · Формат · Город · Следующий шаг · Дата шага · Оценка (star picker) · Причина отказа (только если status=rejected)
-- «необязательно» — правый край
+### Детали (аккордеон, скрыт по умолчанию)
+```
+Следующий шаг ×3          | Дата шага
+Контакт       | Этап      | Формат       | Город
+Оценка        | Кто рекомендовал
+Причина отказа (только если status = rejected)
+Заметки ×3
+```
 
-### Tab order (явные tabIndex)
-1 Компания → 2 Должность → 3 Дата → 4 Статус → 5 ЗП от → 6 ЗП до → 7 Источник →
-8 Ссылка → 9 Контакт → 10 Заметки → 20 Сохранить → 21 Отмена
+### Поведение
+- **Enter** в text/number/url input → submit (если company + role заполнены)
+- **Escape** → cancel
+- Валидация: только company + role обязательны; red border + сообщение при submitAttempted/touched
+- `salary_currency` всегда имеет значение (default 'RUB'), не nullable
+- `normalizeDate` превращает пустую дату в null перед submit
 
-### Expand panel (раскрывается шевроном в конце строки)
-- Только одна строка раскрыта одновременно (`expandedId: string | null` в page.tsx)
-- Показывает Ссылка на вакансию + Контакт с автосохранением на blur
-- `onSaveDetails` вызывается только когда значение изменилось (ref `lastSaved`)
+### Expand panel (JobRow)
+- Шеврон раскрывает tr ниже (colspan all) с полным детальным видом
+- Активные строки: кнопки «Редактировать» + «Удалить» (danger on hover)
+- Удалённые строки: кнопки «Восстановить» + «Удалить навсегда»
+- Только одна строка раскрыта одновременно (`expandedId` в page.tsx)
 
 ---
 
@@ -173,7 +225,7 @@ rating → reject_reason
 --surface-2:       #f6f5f4
 --hairline:        #eae8e3
 --hairline-strong: #dcd9d2
---border-tertiary: var(--hairline)  /* тихий бордер для optional-input */
+--border-tertiary: var(--hairline)
 --ink:             #37352f   /* 12.3:1 ✓ */
 --ink-muted:       #6b685f   /*  5.6:1 ✓ */
 --ink-subtle:      #706c64   /*  5.2:1 ✓ */
@@ -208,55 +260,74 @@ rating → reject_reason
 - `.badge` — pill-бейдж (статусы, форматы работы)
 - `.icon-btn` — ghost icon button
 - `.cell-input` — инпут внутри таблицы (h-8, rounded-md)
-- `.optional-input` — приглушённый инпут row 2 (h-26px, `--border-tertiary`)
-- `.invalid` — красный бордер для cell-input с ошибкой
+- `.optional-input` — приглушённый инпут (h-26px, `--border-tertiary`)
+- `.invalid-field` — красный бордер для инпута с ошибкой
 - `.table-clip` — `table-layout:fixed; width:100%` + `overflow:hidden; ellipsis; nowrap` на всех ячейках
 
 ### Статусы (STATUS_META в types.ts)
 ```
-sent      → 'Отправлено'  stone
-interview → 'Интервью'    amber
-offer     → 'Оффер'       emerald
-rejected  → 'Отказ'       rose
-ghosted   → 'Нет ответа'  тихий stone
+sent      → 'Отправлено' / 'Отклик'    sky/cyan
+interview → 'Интервью'                  violet
+offer     → 'Оффер'                     emerald/teal
+rejected  → 'Отказ'                     rose
+ghosted   → 'Нет ответа'               slate (тихий)
 ```
 
 ### Форматы работы (WORK_FORMAT_BADGE в types.ts)
 ```
-office → 'Офис'      blue tint
-remote → 'Удалённо'  emerald tint
+office → 'Офис'      sky/cyan tint
+remote → 'Удалённо'  emerald/teal tint
 hybrid → 'Гибрид'    amber tint
 ```
 
-### Ключевые архитектурные решения
+### Валюты (CURRENCY_OPTIONS в types.ts)
+```
+RUB | USD | EUR
+```
+`salary_currency: SalaryCurrency` — обязательное поле, не nullable, default 'RUB'.
+Отображение: `250к–330к RUB`, `3к–4к USD`. Пустая зарплата → `—` (без кода).
 
+### Ключевые архитектурные решения
 - **`ring-accent/25` НЕ РАБОТАЕТ** в Tailwind с CSS-переменными → `style={{ borderColor: 'var(--accent-ring)' }}`
 - **Тёмная тема: rim-light** вместо тени — `box-shadow: 0 0 0 1px rgba(255,255,255,0.05)`
-- **`table-layout: fixed` + `<colgroup>`** — единственный надёжный способ зафиксировать ширины колонок без горизонтального скролла
+- **`table-layout: fixed` + `<colgroup>`** — единственный надёжный способ зафиксировать ширины без горизонтального скролла
 - **Компания + Должность без явной ширины** в colgroup → занимают оставшееся место поровну
-- **Salary = 120px** (не 100 как в спеке) — два инпута «от»/«до» в 100px нечитаемы
-- **ColumnPanel**: кнопка-триггер использует `onMouseDown stopPropagation` чтобы click-outside handler в панели не закрывал её раньше чем сработает onClick-toggle
-- **`set` функция в JobRow** использует `// eslint-disable-next-line @typescript-eslint/no-explicit-any` + `v: any` — необходимо для единого обработчика строковых и числовых полей (rating)
+- **Salary column = 156px** — чтобы `250к–330к RUB` помещался без обрезания
+- **StatusPicker** использует `createPortal` с `position:fixed` — избегает overflow:hidden таблицы; закрывается на scroll/resize
+- **ColumnPanel** триггер: `onMouseDown stopPropagation` против race condition с click-outside
 - **`lucide-react` НЕ установлен** — все иконки в `icons.tsx` (Lucide-style SVG, currentColor)
-- **`python`, НЕ `python3`** — на этой машине `python3` заглушка MS Store
+- **`normalizeJob`** — единая точка нормализации RawJob→Job; вызывается при read и insert из Supabase
+- **`isSalaryCurrency`** — type guard без `any`, используется в normalizeJob
+- **GRANTS обязательны**: RLS-политики проверяются ПОСЛЕ table-level privileges. Без `GRANT INSERT ON job_status_history TO authenticated` триггер падает с 42501
+- **Demo mode**: двойная защита `NODE_ENV==='development' && NEXT_PUBLIC_DEMO_JOBS==='true'`; bypass middleware добавляется вручную при необходимости (не коммитить)
 
 ---
 
 ## Компоненты — краткий справочник
 
+### `JobAddForm` props
+```typescript
+interface Props {
+  mode?: 'create' | 'edit'      // default: 'create'
+  initialValue?: JobInsert
+  onSubmit: (data: JobInsert) => Promise<void>
+  onCancel: () => void
+}
+```
+
 ### `JobRow` props
 ```typescript
 interface Props {
-  job?: Job               // undefined = add mode
-  editing: boolean
+  job: Job                             // required (всегда нормализован)
   expanded?: boolean
+  deleted?: boolean
   activeColumns: ColumnKey[]
   onStartEdit: () => void
-  onCancel: () => void
-  onSubmit: (data: JobInsert) => Promise<void>
+  onChangeStatus?: (status: Status) => void
   onDelete?: () => void
+  onRestore?: () => void
+  onPermanentDelete?: () => void
   onToggleExpand?: () => void
-  onSaveDetails?: (patch: { url: string; contact: string }) => Promise<void>
 }
 ```
 
@@ -270,14 +341,21 @@ interface Props {
 }
 ```
 
-### `useColumns()` возвращает
+### `StatCard` props
 ```typescript
-{ active: ColumnKey[], toggle: (key) => void, reset: () => void }
+interface Props {
+  label: string
+  value: number
+  icon: ReactNode
+  onClick?: () => void
+  active?: boolean
+  title?: string
+}
 ```
 
-### `StatCard` props (упрощённый, без tone/featured)
+### `useColumns()` возвращает
 ```typescript
-interface Props { label: string; value: number; icon: ReactNode }
+{ active: ColumnKey[], toggle: (key) => void, reset: () => void, setPreset: (keys) => void }
 ```
 
 ---
@@ -285,16 +363,35 @@ interface Props { label: string; value: number; icon: ReactNode }
 ## page.tsx — ключевые state-переменные
 
 ```typescript
-const [user, setUser]               // Supabase User | null
-const [jobs, setJobs]               // Job[] (весь список)
-const [loading, setLoading]         // skeleton
-const [search, setSearch]           // поиск (company | role)
-const [filterStatus, setFilterStatus] // Status | ''
-const [editId, setEditId]           // string | 'new' | null
-const [expandedId, setExpandedId]   // string | null (expand panel)
-const [panelOpen, setPanelOpen]     // boolean (column configurator)
-const { active: activeColumns, toggle: toggleColumn, reset: resetColumns } = useColumns()
-const pendingDeletes                // useRef<Map<string, ReturnType<setTimeout>>>
+const supabase                          // SupabaseClient | null (null в demo mode)
+const [user, setUser]                   // User | null
+const [jobs, setJobs]                   // Job[] (весь список, включая deleted)
+const [loading, setLoading]             // skeleton
+const [loadError, setLoadError]         // 'auth' | 'jobs' | null
+const [search, setSearch]               // поиск по company | role
+const [filterStatus, setFilterStatus]   // Status | ''
+const [needsActionOnly, setNeedsActionOnly] // фильтр по просроченному next_action
+const [sortMode, setSortMode]           // 'default' | 'urgent'
+const [headerSort, setHeaderSort]       // { key: SortKey, direction: 'asc'|'desc' } | null
+const [quickFilter, setQuickFilter]     // 'all'|'active'|'waiting'|'interview'|'offer'|'archive'|'deleted'
+const [editId, setEditId]               // string | 'new' | null
+const [expandedId, setExpandedId]       // string | null
+const [panelOpen, setPanelOpen]         // boolean (column configurator)
+const { active: activeColumns, toggle: toggleColumn, reset: resetColumns, setPreset: setColumnPreset } = useColumns()
+const { toasts, show: showToast, dismiss: dismissToast } = useToast()
+const pendingDeletes                    // useRef<Map<string, ReturnType<setTimeout>>>
+```
+
+### Ключевые функции
+```typescript
+load()                                  // загрузка jobs + user из Supabase
+createJob(data: JobInsert)              // insert + normalizeJob + optimistic
+updateJob(id, data: JobInsert)          // update + optimistic merge
+updateJobStatus(id, status)            // быстрая смена статуса без формы
+deleteJob(id)                           // soft delete (deleted_at = now) + undo toast
+restoreJob(id)                          // deleted_at = null
+permanentlyDeleteJob(id)                // hard delete + window.confirm
+toJobInsert(job: Job): JobInsert        // конвертация для передачи в форму
 ```
 
 ---
@@ -302,20 +399,18 @@ const pendingDeletes                // useRef<Map<string, ReturnType<setTimeout>
 ## TODO (актуальные)
 
 ### P1
-- [ ] **Вернуть авторизацию** (middleware раскомментировать)
-- [ ] **Сортировка колонок** по клику на заголовок
-- [ ] **Мобильная версия** — кнопки edit/delete не работают на touch
+- [ ] **Применить миграцию `202606050004` к prod Supabase** (salary_currency)
+- [ ] **Мобильная версия** — touch-доступность кнопок
 
 ### P2
 - [ ] Фильтрация по дате / источнику / формату / городу
-- [ ] Клик по StatCard → фильтр по статусу
 - [ ] Горячая клавиша `N` для новой строки
 - [ ] Пагинация / виртуализация при 50+ записях
 - [ ] История статусов (`job_status_history`) — UI для просмотра
+- [ ] Заменить `window.confirm` (permanent delete) на кастомный confirm-диалог
 
 ### P3
 - [ ] `prefers-color-scheme` в meta
-- [ ] `spellCheck={false}` на подзаголовке страницы
 - [ ] Мобильная адаптация expand panel
 
 ---
@@ -333,23 +428,19 @@ dev:     npm run dev  (порт 3000, или 3005 для preview-сервера)
 
 ### Локальный preview и cache Next.js
 
-Проблема, которая уже ловилась: после `npm.cmd run build` живой `next dev` на `localhost:3005` начинал отдавать голый HTML без Tailwind/CSS или ошибку вида `Cannot find module './276.js'`. Причина — `next dev` и `next build` писали в один и тот же `.next`, из-за чего dev-сервер смотрел на рассинхронизированные production-артефакты.
+`next.config.js` разделяет директории по `NEXT_LOCAL_DIST_DIR=1`:
+- dev server → `.next`
+- production build → `.next-build`
+- В production (Vercel) — дефолтный `.next` (флаг не выставлен)
 
-Принятое решение:
-- `next.config.js` задаёт разные output-директории:
-  - dev server (`PHASE_DEVELOPMENT_SERVER`) → `.next`
-  - production build → `.next-build`
-- `tsconfig.json` включает и `.next/types/**/*.ts`, и `.next-build/types/**/*.ts`
-- Для проверки использовать `npm.cmd run build`, не `npm run build` в PowerShell, если `npm.ps1` блокируется policy.
-- Preview на 3005 можно поднимать так: `node node_modules\next\dist\bin\next dev -p 3005`
-
-Проверенный сценарий: при живом dev server на `http://localhost:3005/dashboard` запуск `npm.cmd run build` больше не ломает CSS; dashboard и `/_next/static/css/app/layout.css` остаются `200`.
+Команда сборки: `npm.cmd run build` (не `npm run build` в PowerShell если блокируется policy).
+Preview на 3005: `NEXT_PUBLIC_DEMO_JOBS=true node node_modules\next\dist\bin\next dev -p 3005`
 
 ### Дизайн-инструменты (локально, в .gitignore)
 ```
-.claude/skills/impeccable/           ← v3.5.0, 23 команды
+.claude/skills/impeccable/
 .agents/skills/design-taste-frontend/
 .claude/skills/ui-ux-pro-max/
-.design/awesome-design-md/           ← 73 DESIGN.md брендов
+.design/awesome-design-md/
 .claude/launch.json                  ← preview server (port 3005)
 ```

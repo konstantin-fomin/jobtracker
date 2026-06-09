@@ -90,6 +90,62 @@ const ENTER_SUBMIT_INPUT_TYPES = new Set([
 const normalizeDate = (value: string | null | undefined) =>
   value?.trim() ? value : null
 
+/** "180000" → "180 000", non-digit chars are stripped */
+function fmtThousands(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (!digits) return ''
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+}
+
+function SalaryInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string
+  onChange: (raw: string) => void
+  placeholder?: string
+}) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const el = e.target
+    const cursorPos = el.selectionStart ?? 0
+    // how many real digits were before the cursor in the old (formatted) value
+    const digitsBeforeCursor = el.value.slice(0, cursorPos).replace(/\D/g, '').length
+
+    const digits = el.value.replace(/\D/g, '')
+    onChange(digits)
+
+    // After React commits the new formatted value, restore cursor to the
+    // same logical digit position so inserted spaces don't shift the caret.
+    requestAnimationFrame(() => {
+      const formatted = fmtThousands(digits)
+      let newPos = 0
+      let digitCount = 0
+      for (let i = 0; i < formatted.length; i++) {
+        if (/\d/.test(formatted[i])) {
+          digitCount++
+        }
+        if (digitCount === digitsBeforeCursor) {
+          newPos = i + 1
+          break
+        }
+      }
+      if (digitCount < digitsBeforeCursor) newPos = formatted.length
+      el.setSelectionRange(newPos, newPos)
+    })
+  }
+
+  return (
+    <input
+      value={fmtThousands(value)}
+      onChange={handleChange}
+      placeholder={placeholder}
+      inputMode="numeric"
+      className="h-10 w-full"
+    />
+  )
+}
+
 function canSubmitWithEnter(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false
   if (target.getAttribute('role') === 'button') return false
@@ -248,19 +304,17 @@ export default function JobAddForm({ mode = 'create', initialValue, onSubmit, on
             />
           </Field>
           <Field label="ЗП от">
-            <input
+            <SalaryInput
               value={draft.salary_from}
-              onChange={e => set('salary_from', e.target.value)}
+              onChange={v => set('salary_from', v)}
               placeholder="от"
-              className="h-10 w-full"
             />
           </Field>
           <Field label="ЗП до">
-            <input
+            <SalaryInput
               value={draft.salary_to}
-              onChange={e => set('salary_to', e.target.value)}
+              onChange={v => set('salary_to', v)}
               placeholder="до"
-              className="h-10 w-full"
             />
           </Field>
           <Field label="Валюта">

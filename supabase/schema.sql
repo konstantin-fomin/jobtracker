@@ -8,7 +8,7 @@ create table public.jobs (
   company          text not null,
   role             text not null,
   status           text not null default 'sent'
-                     check (status in ('sent','interview','offer','rejected','ghosted')),
+                     check (status in ('sent','interview','test','offer','rejected','ghosted')),
   source           text,
   date             date,
   salary_from      text,
