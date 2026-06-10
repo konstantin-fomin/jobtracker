@@ -36,7 +36,7 @@ function WorkFormatBadge({ value }: { value: string }) {
 // clipped cells (`.table-clip` overflow:hidden) and the card's overflow:hidden.
 function StatusPicker({ status, onSelect }: { status: Status; onSelect: (s: Status) => void }) {
   const [open, setOpen] = useState(false)
-  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null)
+  const [coords, setCoords] = useState<{ top?: number; bottom?: number; left: number } | null>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -64,7 +64,14 @@ function StatusPicker({ status, onSelect }: { status: Status; onSelect: (s: Stat
   const toggle = () => {
     if (open) { setOpen(false); return }
     const r = triggerRef.current?.getBoundingClientRect()
-    if (r) setCoords({ top: r.bottom + 4, left: r.left })
+    if (r) {
+      const spaceBelow = window.innerHeight - r.bottom
+      if (spaceBelow < 240) {
+        setCoords({ bottom: window.innerHeight - r.top + 4, left: r.left })
+      } else {
+        setCoords({ top: r.bottom + 4, left: r.left })
+      }
+    }
     setOpen(true)
   }
 
@@ -92,7 +99,7 @@ function StatusPicker({ status, onSelect }: { status: Status; onSelect: (s: Stat
           ref={menuRef}
           role="menu"
           onClick={e => e.stopPropagation()}
-          style={{ position: 'fixed', top: coords.top, left: coords.left, zIndex: 50 }}
+          style={{ position: 'fixed', top: coords.top, bottom: coords.bottom, left: coords.left, zIndex: 50 }}
           className="min-w-[164px] rounded-lg border border-hairline bg-surface p-1 shadow-lg"
         >
           {STATUS_ORDER.map(s => (
